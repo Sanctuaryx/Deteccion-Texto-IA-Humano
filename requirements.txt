@@ -1,38 +1,18 @@
-# Core ML
+# Núcleo
 numpy
-pandas
 scikit-learn
-xgboost
 torch
-transformers
-sentence-transformers
-datasets
-accelerate
-evaluate
 
-# NLP ES
-spacy
-es-core-news-md @ https://github.com/explosion/spacy-models/releases/download/es_core_news_md-3.7.0/es_core_news_md-3.7.0-py3-none-any.whl
-nltk
-
-# Explainability (puedes quitarlo si no lo usas de momento)
-shap
-
-# MLOps (opcionales, pero útiles)
-mlflow
-dvc
-hydra-core
-
-# API/UI
+# API y UI
 flask
-uvicorn
 streamlit
+requests
 
-# Viz
-matplotlib
-
-# Dev
+# Utilidades
 pyyaml
+tqdm
+
+# Desarrollo / tests (opcionales)
 pytest
 flake8
 black

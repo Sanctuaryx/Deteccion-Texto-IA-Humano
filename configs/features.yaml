@@ -1,6 +1,0 @@
-embeddings:
-  model: intfloat/multilingual-e5-base
-  normalize: true
-perplexity:
-  model: datificate/gpt2-small-spanish
-min_words_operational: 30
