@@ -10,6 +10,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
+import numpy as np
+from sklearn.metrics import f1_score
 from iatd.data.datasets import read_jsonl
 from iatd.logging import setup_logging
 from iatd.models.custom_bilstm import BiLSTMClassifier
@@ -146,6 +148,8 @@ def main() -> None:
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
 
     best_roc = 0.0
+    patience = 3
+    epochs_without_improvement = 0
 
     for epoch in range(1, args.epochs + 1):
         print(f"Epoch {epoch}/{args.epochs}")
@@ -161,6 +165,7 @@ def main() -> None:
 
         if metrics["roc_auc"] > best_roc:
             best_roc = metrics["roc_auc"]
+            epochs_without_improvement = 0
             print("Mejor ROC-AUC, guardando modelo...")
             out_dir = pathlib.Path(args.out_dir)
             out_dir.mkdir(parents=True, exist_ok=True)
@@ -177,6 +182,11 @@ def main() -> None:
                     ensure_ascii=False,
                     indent=2,
                 )
+        else:
+            epochs_without_improvement += 1
+            if epochs_without_improvement >= patience:
+                print("Early stopping por falta de mejora en ROC-AUC.")
+                break        
 
 
 if __name__ == "__main__":
