@@ -448,7 +448,7 @@ def main() -> None:
             )
 
         # Guardar todo en un JSON global
-        out_all = ROOT / "artifacts" / "all_models_metrics.json"
+        out_all = ROOT / "metrics" / "all_models_metrics.json"
         out_all.parent.mkdir(parents=True, exist_ok=True)
         with out_all.open("w", encoding="utf-8") as f:
             json.dump(all_results, f, ensure_ascii=False, indent=2)

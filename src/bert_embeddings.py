@@ -16,7 +16,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from logic.models.vocab import simple_tokenize
 
 MODEL_NAME = "dccuchile/bert-base-spanish-wwm-cased"
 
