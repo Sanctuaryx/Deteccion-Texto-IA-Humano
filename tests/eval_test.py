@@ -28,9 +28,9 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-import iatd.models.custom_bilstm as bilstm
-import iatd.models.dataset as dataset
-import iatd.models.vocab as v
+import logic.models.custom_bilstm as bilstm
+import logic.models.dataset as dataset
+import logic.models.vocab as v
 # ==============================================
 
 

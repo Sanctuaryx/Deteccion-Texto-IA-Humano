@@ -7,8 +7,8 @@ import pathlib
 import torch
 from flask import Flask, jsonify, request
 
-from iatd.models.custom_bilstm import BiLSTMClassifier
-from iatd.models.vocab import Vocab
+from logic.models.custom_bilstm import BiLSTMClassifier
+from logic.models.vocab import Vocab
 
 app = Flask(__name__)
 
