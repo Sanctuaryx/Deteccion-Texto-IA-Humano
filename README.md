@@ -10,36 +10,6 @@ Incluye una **API REST** para inferencia con los 3 modelos.
 
 ---
 
-## Estructura esperada
-
-> Los nombres de paquetes pueden ser `logic/` o `iatd/` (según tu refactor).  
-> **Lo importante:** el código está en el paquete (logic/iatd) y los modelos entrenados en `artifacts/`.
-
-```
-.
-├── logic/  (o iatd/)
-│   ├── __init__.py
-│   └── models/
-│       ├── __init__.py
-│       ├── custom_bilstm.py
-│       ├── dataset.py
-│       └── vocab.py
-├── src/
-│   ├── bert_embeddings.py
-│   └── train_bert.py
-├── tests/
-│   └── eval_test.py
-├── artifacts/                # <-- modelos entrenados (se generan)
-├── data/                     # <-- datasets
-├── train.py                  # <-- entrena BiLSTM (rand / w2v)
-└── api.py                    # <-- API Flask
-```
-
-> **Importante:** los modelos entrenados NO se guardan dentro del paquete (`logic/` o `iatd/`).  
-> Todo va en `artifacts/`.
-
----
-
 ## Requisitos
 
 - Python 3.10+ recomendado
@@ -48,7 +18,7 @@ Incluye una **API REST** para inferencia con los 3 modelos.
 - `gensim` para Word2Vec
 - `flask` para la API
 
-Instalación típica (Windows PowerShell):
+Instalación con Windows PowerShell:
 
 ```powershell
 python -m venv .venv
@@ -75,18 +45,18 @@ Ejemplos:
 
 # Entrenamiento de los 3 modelos
 
-## 1) BiLSTM base (embeddings aleatorios) → `artifacts/bilstm_rand`
+## 1) BiLSTM base (embeddings aleatorios) → `logic/artifacts/bilstm_rand`
 
 Entrenar:
 
 ```powershell
-python train.py --train_path data/train.csv --val_path data/val.csv --out_dir artifacts/bilstm_rand
+python train.py --train_path data/train.csv --val_path data/val.csv --out_dir logic/artifacts/bilstm_rand
 ```
 
 Artefactos generados:
 
 ```
-artifacts/bilstm_rand/
+logic/artifacts/bilstm_rand/
   model.pt
   vocab.json
   config.json
@@ -95,51 +65,44 @@ artifacts/bilstm_rand/
 Evaluar en test:
 
 ```powershell
-python tests/eval_test.py --test_path data/test_es.csv --bilstm_rand_dir artifacts/bilstm_rand
+python tests/eval_test.py --test_path data/test_es.csv --bilstm_rand_dir logic/artifacts/bilstm_rand
 ```
 
 ---
 
-## 2) Word2Vec + BiLSTM → `artifacts/bilstm_w2v`
+## 2) Word2Vec + BiLSTM → `logic/artifacts/bilstm_w2v`
 
-### 2.1 Entrenar Word2Vec (embeddings) → `artifacts/w2v.model`
+### 2.1 Entrenar Word2Vec (embeddings) → `logic/artifacts/w2v.model`
 
 > Esto entrena **solo** Word2Vec (sin labels). **No es el clasificador.**  
-> Usa el script que exista en tu repo (uno de estos dos):
+> Es necesario usar el script para entrenar el modelo usando los embeddings generados:
 >
-> - `python iatd/training/train_w2v.py ...`  
-> - `python src/train_w2v.py ...`
+> - `python logic/training/train_w2v.py`  
 
-Comando (opción A):
-
-```powershell
-python iatd/training/train_w2v.py --train_path data/train.csv --out_path artifacts/w2v.model
-```
-
-Comando (opción B):
+Comando:
 
 ```powershell
-python src/train_w2v.py --train_path data/train.csv --out_path artifacts/w2v.model
+python logic/training/train_w2v.py --train_path data/train.csv --out_path logic/artifacts/bilstm_w2v/embeddings
 ```
 
 Genera:
 
-- `artifacts/w2v.model`
-- `artifacts/w2v.model.syn1neg.npy`
-- `artifacts/w2v.model.wv.vectors.npy`
+- `logic/artifacts/bilstm_w2v/embeddings/bilstm_w2v.model`
+- `logic/artifacts/bilstm_w2v/embeddings/w2v.model.syn1neg.npy`
+- `logic/artifacts/bilstm_w2v/embeddings/w2v.model.wv.vectors.npy`
 
 ### 2.2 Entrenar BiLSTM usando embeddings W2V
 
 > `train.py` debe aceptar `--w2v_path` y usarlo para inicializar la capa `nn.Embedding`.
 
 ```powershell
-python train.py --train_path data/train.csv --val_path data/val.csv --w2v_path artifacts/w2v.model --out_dir artifacts/bilstm_w2v
+python train.py --train_path data/train.csv --val_path data/val.csv --w2v_path logic/artifacts/bilstm_w2v/embeddings/bilstm_w2v.model --out_dir logic/artifacts/bilstm_w2v
 ```
 
 Artefactos generados:
 
 ```
-artifacts/bilstm_w2v/
+logic/artifacts/bilstm_w2v/
   model.pt
   vocab.json
   config.json
@@ -148,12 +111,12 @@ artifacts/bilstm_w2v/
 Evaluar en test:
 
 ```powershell
-python tests/eval_test.py --test_path data/test_es.csv --bilstm_w2v_dir artifacts/bilstm_w2v
+python tests/eval_test.py --test_path data/test_es.csv --bilstm_w2v_dir logic/artifacts/bilstm_w2v
 ```
 
 ---
 
-## 3) BERT embeddings + MLP → `artifacts/bert`
+## 3) BERT embeddings + MLP → `logic/artifacts/bert`
 
 ### 3.1 Generar embeddings BERT (train / val / test)
 
@@ -172,13 +135,13 @@ Cada `.npz` contiene:
 ### 3.2 Entrenar el MLP sobre embeddings
 
 ```powershell
-python src/train_bert.py --train_npz data/bert/bert_train.npz --val_npz data/bert/bert_val.npz --test_npz data/bert/bert_test.npz --out_dir artifacts/bert
+python src/train_bert.py --train_npz data/bert/bert_train.npz --val_npz data/bert/bert_val.npz --test_npz data/bert/bert_test.npz --out_dir logic/artifacts/bert
 ```
 
 Artefactos generados:
 
 ```
-artifacts/bert/
+logic/artifacts/bert/
   model.pt
   config.json
   test_metrics.json
@@ -187,7 +150,7 @@ artifacts/bert/
 Evaluación (opcional, también se puede hacer desde el comparador global):
 
 ```powershell
-python tests/eval_test.py --bert_mlp_dir artifacts/bert --bert_test_npz data/bert/bert_test.npz
+python tests/eval_test.py --bert_mlp_dir logic/artifacts/bert --bert_test_npz data/bert/bert_test.npz
 ```
 
 ---
@@ -197,16 +160,16 @@ python tests/eval_test.py --bert_mlp_dir artifacts/bert --bert_test_npz data/ber
 ```powershell
 python tests/eval_test.py `
   --test_path data/test_es.csv `
-  --bilstm_rand_dir artifacts/bilstm_rand `
-  --bilstm_w2v_dir artifacts/bilstm_w2v `
-  --bert_mlp_dir artifacts/bert `
+  --bilstm_rand_dir logic/artifacts/bilstm_rand `
+  --bilstm_w2v_dir logic/artifacts/bilstm_w2v `
+  --bert_mlp_dir logic/artifacts/bert `
   --bert_test_npz data/bert/bert_test.npz
 ```
 
 Esto imprime una tabla comparativa y guarda:
 
 ```
-artifacts/all_models_metrics.json
+metrics/all_models_metrics.json
 ```
 
 ---
@@ -292,9 +255,9 @@ curl -X POST http://localhost:8001/predict   -H "Content-Type: application/json"
 Puedes cambiar rutas y modelo por defecto sin tocar código:
 
 ```powershell
-$env:BILSTM_RAND_DIR="artifacts/bilstm_rand"
-$env:BILSTM_W2V_DIR="artifacts/bilstm_w2v"
-$env:BERT_DIR="artifacts/bert"
+$env:BILSTM_RAND_DIR="logic/artifacts/bilstm_rand"
+$env:BILSTM_W2V_DIR="logic/artifacts/bilstm_w2v"
+$env:BERT_DIR="logic/artifacts/bert"
 $env:BERT_BASE_MODEL="dccuchile/bert-base-spanish-wwm-cased"
 $env:DEFAULT_MODEL="bilstm_rand"
 python api.py
@@ -307,17 +270,17 @@ python api.py
 Antes de arrancar la API, deben existir:
 
 **BiLSTM rand**
-- `artifacts/bilstm_rand/model.pt`
-- `artifacts/bilstm_rand/vocab.json`
-- `artifacts/bilstm_rand/config.json`
+- `logic/artifacts/bilstm_rand/model.pt`
+- `logic/artifacts/bilstm_rand/vocab.json`
+- `logic/artifacts/bilstm_rand/config.json`
 
 **BiLSTM + W2V**
-- `artifacts/bilstm_w2v/model.pt`
-- `artifacts/bilstm_w2v/vocab.json`
-- `artifacts/bilstm_w2v/config.json`
+- `logic/artifacts/bilstm_w2v/model.pt`
+- `logic/artifacts/bilstm_w2v/vocab.json`
+- `logic/artifacts/bilstm_w2v/config.json`
 
 **BERT + MLP**
-- `artifacts/bert/model.pt`
-- `artifacts/bert/config.json`
+- `logic/artifacts/bert/model.pt`
+- `logic/artifacts/bert/config.json`
 
 > Para BERT+MLP, la API calcula embeddings al vuelo usando el modelo base definido por `BERT_BASE_MODEL`.
